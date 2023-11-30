@@ -28,13 +28,21 @@ def create_payment_link():
 @app.route("/webhooks", methods=["POST"])
 def webhook():
     payload = request.data
-    data = json.loads(payload)
+    sig_header = request.headers.get('Stripe-Signature')
     event = None
+    data = json.loads(payload)
 
     try:
-        event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, os.environ["STRIPE_SECRET"]
+        )
     except ValueError as e:
         # Invalid payload
+        print(f"Error parsing payload: {str(e)}")
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        print(f"Error verifying webhook signature: {str(e)}")
         return Response(status=400)
 
     # Handle the event
