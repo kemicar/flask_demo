@@ -49,12 +49,12 @@ def webhook():
 
     if event["type"] == "invoice.paid":
         sub_id = data.get("data", {}).get("object", {}).get("subscription")
-
+        
         sub_ids = read_write("cache.json", read=True, list_=None)
 
         sub_ids = check_and_trim(sub_ids)
 
-        if not check_if_in_list(sub_ids, sub_id):
+        if not check_if_in_list(sub_ids, sub_id) and event['data']['object']["billing_reason"]=="subscription_create":
             # checking if sub_id in cache_sub_id
             license_key = generate_license()
 
@@ -79,7 +79,7 @@ def webhook():
                 }
             )
             read_write("cache.json", read=False, list_=sub_ids)
-        else:
+        elif check_if_in_list(sub_ids, sub_id):
             sub_id = stripe.Subscription.retrieve(sub_id)
             try:
                 index_ = check_where_in_list(sub_ids, sub_id)
@@ -92,8 +92,8 @@ def webhook():
                         validity,
                     )
 
-            except:
-                pass
+            except Exception as e:
+                print("An error occurred: ", e)
 
             # retrieve license id + validity period
 

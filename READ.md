@@ -1,8 +1,8 @@
 # Stripe Integrations inside LicenseSpring  
 ## Introduction
->In this tutorial we will step by step how can you manage your integration inside **LicenseSpring**. For this purposes we will use **Stripe** and **LicenseSpring Management API**. Backend is managed inside Python using Flask.
+In this tutorial, we will guide you step-by-step through the process of managing your integration within **LicenseSpring**. Specifically, we will focus on utilizing **Stripe** and the **LicenseSpring Management API**. The backend will be managed using **Python** with the **Flask** framework.
 ### Tutorial Prerequisites  
->Before beginning this tutorial, it's recommended that users familiarize themselves with:
+Before beginning this tutorial, it's recommended that users familiarize themselves with:
 * **[Management API](https://docs.licensespring.com/management-api)**
   *  [Authorization](https://docs.licensespring.com/management-api/authorization)
   *  [Retrieve License](https://docs.licensespring.com/management-api/license/retrieve), [Create Order](https://docs.licensespring.com/management-api/order/create-order), [Disable License](https://docs.licensespring.com/management-api/license/disable), [Generate License](https://docs.licensespring.com/management-api/order/generate-license), [Update License](https://docs.licensespring.com/management-api/license/update)
@@ -10,13 +10,13 @@
    *  [Subscription Integration](https://docs.licensespring.com/integrations/subscription-integration)
 ## Description
 ### Third party services and webhooks
-Payment Integration such as **Stripe, FastSpring, SalesForce** and **etc.** are enabled because of **webhooks**. **Webhooks** are a powerful feature used in integrating **third-party** services with your application, providing a way for applications to receive **real-time information** from other services.
+Payment Integration such as **Stripe, FastSpring, SalesForce** and **etc.** are made possible through the use of **webhooks**. **Webhooks** are a powerful feature used in integrating **third-party** services with your application, providing a way for applications to receive **real-time information** from other services.
 ![Image](readme/image_int.png) <p align="center">_Handling Webhooks_</p>
-Real time information can be also called an event. In our application we will handle events: 
-* invoice.paid
-* customer.subscription.deleted  
+Real time information can be also called an event. In our application we handle events: 
+* **invoice.paid**
+* **customer.subscription.deleted**
 
-Detail explanation of event handling will be explained in code section
+Detail explanation of event handling will be explained in future section's.
 ## Installation and Setup
 ### Prerequisites
 * Python 3.11.4 
@@ -38,17 +38,17 @@ Detail explanation of event handling will be explained in code section
      * `source venv/bin/activate` # On Windows use `venv\Scripts\activate`
      * `pip install -r requirements.txt`
 3. Create .env file
-
->* API_MANAGAMENT_KEY="api_management_key_from_LS" 
->* UUID = "your_uuid_from_LS"
->* SHARED_KEY ="shared_key_from_LS"
->* PRODUCT_SHORT_CODE = "LS_product"
->* ORDER_BASE_STRING="stripe_order_env"
->* BASE_URL="https://saas.licensespring.com"
->* API_URL ='https://api.licensespring.com'
->* STRIPE_PRIVATE_KEY="your_stripe_key"
->* STRIPE_PRODUCT="your_stripe_product" 
-
+```
+API_MANAGAMENT_KEY="api_management_key_from_LS" 
+UUID = "your_uuid_from_LS"
+SHARED_KEY ="shared_key_from_LS"
+PRODUCT_SHORT_CODE = "LS_product"
+ORDER_BASE_STRING="stripe_order_env"
+BASE_URL="https://saas.licensespring.com"
+API_URL ='https://api.licensespring.com'
+STRIPE_PRIVATE_KEY="your_stripe_key"
+STRIPE_PRODUCT="your_stripe_product" 
+```
 License Spring Keys can be found inside [portal](https://saas.licensespring.com) *Settings --> Keys*. *ORDER_BASE_STRING* is just name of order_id.  
 STRIPE_PRIVATE_KEY can be found in _Developers --> API keys --> Secret key_  
 STRIPE_PRODUCT can be found in _Products --> Pricing --> API ID_  
@@ -57,20 +57,22 @@ STRIPE_PRODUCT can be found in _Products --> Pricing --> API ID_
 
 1. Open side terminal which will listen to webhook events and run commands:
    * `stripe login` --> login to your Stripe account
-   * `stripe listen --forward-to http://localhost:5000/webhook`
-2. Run flask app --> `flask run`
+   * `stripe listen --forward-to http://localhost:5000/webhook` --> Stripe will send Stripe Secret inside terminal
+   * add Stripe Secret to .env file **STRIPE_SECRET="your_secret"**
+2. Run flask app --> `flask run` 
 
 ### App Usage
 ### Create License 
- 1. Visit inside your web --> http://localhost:5000/
+ 1. Visit inside your web --> **http://localhost:5000/**
  2. Click --> Create Payment Link 
  3. Click on stripe payment link and proceed payment
 
-If payment is successful LicenseSpring will create Subscription type license. You can check your [portal](https://saas.licensespring.com).   
-This application handles when subscription is cancelled inside stripe. License will become disable and valid duration will be set depending on stripe billing cycle (day,week,month and year).  
+If payment was successful **LicenseSpring** will create **Subscription** type license. You can check your [portal](https://saas.licensespring.com).   
+This application handles when **subscription** is cancelled inside **stripe**. License will become **disabled** and **valid duration** will be set depending on **stripe billing cycle** (day,week,month and year).  
 Application handles incoming invoices of subscription which were made from application.  
-For detail explanation of code check **Detail Explanation** section    
-**WARNING: This application handles up to 100. There is no data base everything is saved inside cache.json**
+For detail explanation of code check **Detail Explanation** section  
+**WARNING: New invoices and cancel subscription are handled only for subscriptions inside cache**    
+**WARNING: This application handles up to 100 licenses. After you try to create 101th subscription first one is removed. There is no database model everything is saved inside cache.json**
 ### Detail Explanation
 **Project tree**
 ```

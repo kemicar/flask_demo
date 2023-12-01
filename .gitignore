@@ -5,8 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-#readme files
-readme/
+cache.json
+
 # Distribution / packaging
 .Python
 env/
