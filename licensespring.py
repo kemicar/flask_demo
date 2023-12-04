@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+import uuid
 
 def find_license_id(license_key):
     response = requests.get(
@@ -101,7 +102,7 @@ def create_order(license_key, interval):
         date = one_year_later.strftime("%Y-%m-%d")
 
     body = {
-        "id": "stripe_license"+license_key,
+        "id": str(uuid.uuid4()),
         "items": [
             {
                 "product_code": os.environ["PRODUCT_SHORT_CODE"],
