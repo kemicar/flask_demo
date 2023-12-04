@@ -3,6 +3,17 @@ import requests
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+def find_license_id(license_key):
+    response = requests.get(
+        url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/"),
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        params={"license_key":license_key}
+    )
+    try:
+        return response.json()["results"][0]["id"]
+    except Exception as e:
+        print(f"An exception occurred: {e}")
+        
 
 def disable_license(license_id):
     requests.post(
@@ -70,7 +81,7 @@ def update_license_subscription(license_id, interval, validity):
     return response
 
 
-def create_order(license_key, order_number, interval):
+def create_order(license_key, interval):
     now_utc = datetime.utcnow()
     if interval == "day":
         # Add one day to the current UTC time
@@ -90,7 +101,7 @@ def create_order(license_key, order_number, interval):
         date = one_year_later.strftime("%Y-%m-%d")
 
     body = {
-        "id": order_number,
+        "id": "stripe_license"+license_key,
         "items": [
             {
                 "product_code": os.environ["PRODUCT_SHORT_CODE"],
