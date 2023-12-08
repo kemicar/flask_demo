@@ -4,9 +4,29 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import uuid
 
+def date_return(interval,validity):
+
+    if interval == "day":
+        # Add one day to the current UTC time
+        time_later = validity + timedelta(days=1)
+        
+    elif interval == "week":
+        time_later = validity + timedelta(weeks=1)
+
+    elif interval == "month":
+        time_later = validity + relativedelta(months=1)
+
+    else:
+        time_later = validity + relativedelta(year=1)
+
+    date = time_later.strftime("%Y-%m-%d")
+
+    return date
+
+
 def find_license_id(license_key):
     response = requests.get(
-        url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/"),
+        url="{}{}".format(os.environ["BASE_URL"], "/api/v1/licenses/"),
         headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
         params={"license_key":license_key}
     )
@@ -54,22 +74,8 @@ def cancel_sub(license_id, interval):
 
 
 def update_license_subscription(license_id, interval, validity):
-    if interval == "day":
-        # Add one day to the current UTC time
-        one_day_later = validity + timedelta(days=1)
-        date = one_day_later.strftime("%Y-%m-%d")
-
-    elif interval == "week":
-        one_week_later = validity + timedelta(weeks=1)
-        date = one_week_later.strftime("%Y-%m-%d")
-
-    elif interval == "month":
-        one_month_later = validity + relativedelta(months=1)
-        date = one_month_later.strftime("%Y-%m-%d")
-
-    else:
-        one_year_later = validity + relativedelta(year=1)
-        date = one_year_later.strftime("%Y-%m-%d")
+    
+    date = date_return(interval,validity)
 
     body = {"is_trial": False, "validity_period": date}
 
@@ -84,23 +90,9 @@ def update_license_subscription(license_id, interval, validity):
 
 def create_order(license_key, interval):
     now_utc = datetime.utcnow()
-    if interval == "day":
-        # Add one day to the current UTC time
-        one_day_later = now_utc + timedelta(days=1)
-        date = one_day_later.strftime("%Y-%m-%d")
 
-    elif interval == "week":
-        one_week_later = now_utc + timedelta(weeks=1)
-        date = one_week_later.strftime("%Y-%m-%d")
-
-    elif interval == "month":
-        one_month_later = now_utc + relativedelta(months=1)
-        date = one_month_later.strftime("%Y-%m-%d")
-
-    else:
-        one_year_later = now_utc + relativedelta(year=1)
-        date = one_year_later.strftime("%Y-%m-%d")
-
+    date = date_return(interval,now_utc)
+    
     body = {
         "id": str(uuid.uuid4()),
         "items": [

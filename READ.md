@@ -57,7 +57,7 @@ STRIPE_PRODUCT can be found in _Products --> Pricing --> API ID_
 
 1. Open side terminal which will listen to webhook events and run commands:
    * `stripe login` --> login to your Stripe account
-   * `stripe listen --forward-to http://localhost:5000/webhook` --> Stripe will send Stripe Secret inside terminal
+   * `stripe listen --forward-to http://localhost:5000/webhooks` --> Stripe will send Stripe Secret inside terminal
    * add Stripe Secret to .env file **STRIPE_SECRET="your_secret"**
 2. Run flask app --> `flask run` 
 

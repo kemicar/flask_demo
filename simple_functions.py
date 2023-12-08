@@ -6,13 +6,6 @@ def check_and_trim(list_):
         list_.pop(0)
     return list_
 
-
-def check_if_in_list(list_, sub_id):
-    for element in list_:
-        if element["sub_id"] == sub_id:
-            return True
-
-
 def read(file_dir):
     try:
         with open(file_dir, "r") as file:

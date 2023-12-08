@@ -4,20 +4,20 @@ import json
 import stripe
 from flask import Response
 from licensespring import *
-from cache_funs import *
+from simple_functions import *
 
 stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
+LINK = stripe.PaymentLink.create(
+        line_items=[{"price": os.environ["STRIPE_PRODUCT"], "quantity": 1}],
+    )
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def home():
-    link = stripe.PaymentLink.create(
-        line_items=[{"price": os.environ["STRIPE_PRODUCT"], "quantity": 1}],
-    )
-
-    return render_template("home.html", link=link)
+    
+    return render_template("home.html", link=LINK)
 
 
 @app.route("/webhooks", methods=["POST"])
@@ -29,6 +29,8 @@ def webhook():
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, os.environ["STRIPE_SECRET"])
+        list_events = read("cache.json")
+        list_events = check_and_trim(list_events)
 
     except ValueError as e:
         # Invalid payload
@@ -51,8 +53,7 @@ def webhook():
             .get("interval", None)
         )
         subscription_id = data.get("data", {}).get("object", {}).get("id", None)
-        list_events = read("cache.json")
-        list_events = check_and_trim(list_events)
+        
 
         if event_id not in list_events:
             list_events.append(event_id)
@@ -65,7 +66,6 @@ def webhook():
 
             create_order(license_key, interval)
             
-           
             write("cache.json", list_events)
 
     elif event["type"] == "invoice.paid":
@@ -75,8 +75,7 @@ def webhook():
         )
         line_items = data.get("data", {}).get("object", {}).get("lines", {}).get("data", [])
         interval = line_items[0].get("plan", {}).get("interval") if line_items else None
-        list_events = read("cache.json")
-        list_events = check_and_trim(list_events)
+       
 
         if event_id not in list_events:
             list_events.append(event_id)
@@ -98,8 +97,7 @@ def webhook():
         )
 
         interval = data.get("data", {}).get("object", {}).get("plan", {}).get("interval", None)
-        list_events = read("cache.json")
-        list_events = check_and_trim(list_events)
+        
 
         if event_id not in list_events and license_key != None:
             list_events.append(event_id)
