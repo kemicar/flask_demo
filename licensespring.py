@@ -5,10 +5,11 @@ from dateutil.relativedelta import relativedelta
 import uuid
 
 def date_return(interval,validity):
-
+    print(interval)
     if interval == "day":
         # Add one day to the current UTC time
         time_later = validity + timedelta(days=1)
+        
         
     elif interval == "week":
         time_later = validity + timedelta(weeks=1)

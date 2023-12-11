@@ -7,9 +7,7 @@ from licensespring import *
 from simple_functions import *
 
 stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
-LINK = stripe.PaymentLink.create(
-        line_items=[{"price": os.environ["STRIPE_PRODUCT"], "quantity": 1}],
-    )
+list_events = read("cache.json")
 
 app = Flask(__name__)
 
@@ -17,7 +15,8 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     
-    return render_template("home.html", link=LINK)
+    return render_template("home.html", link = os.environ["PAYMENT_LINK"]
+)
 
 
 @app.route("/webhooks", methods=["POST"])
@@ -25,12 +24,18 @@ def webhook():
     payload = request.data
     sig_header = request.headers.get("Stripe-Signature")
     event = None
-    data = json.loads(payload)
+    
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, os.environ["STRIPE_SECRET"])
-        list_events = read("cache.json")
+        
+        
         list_events = check_and_trim(list_events)
+
+        event_id = event.get("id", None)
+
+        if event_id in list_events:
+            return Response(status=400)
 
     except ValueError as e:
         # Invalid payload
@@ -43,74 +48,57 @@ def webhook():
 
     # Handle the event
     if event["type"] == "customer.subscription.created":
-        event_id = data.get("id", None)
-        interval = (
-            data.get("data", {})
-            .get("object", {})
-            .get("items", {})
-            .get("data", [{}])[0]
-            .get("plan", {})
-            .get("interval", None)
-        )
-        subscription_id = data.get("data", {}).get("object", {}).get("id", None)
-        
 
-        if event_id not in list_events:
-            list_events.append(event_id)
-            license_key = generate_license()
+        interval=event["data"]["object"]["plan"]["interval"]
+        subscription_id = event.get("data", {}).get("object", {}).get("id", None)
+    
+        license_key = generate_license()
 
-            stripe.Subscription.modify(
-                subscription_id,
-                metadata={"license_key": license_key},
-            )
+        stripe.Subscription.modify(subscription_id,metadata={"license_key": license_key},)
 
-            create_order(license_key, interval)
+        create_order(license_key, interval)
             
-            write("cache.json", list_events)
 
     elif event["type"] == "invoice.paid":
-        event_id = data.get("id", None)
+        
         license_key = (
-            data.get("data", {}).get("object", {}).get("metadata", {}).get("license_key", None)
+            event.get("data", {}).get("object", {}).get("metadata", {}).get("license_key", None)
         )
-        line_items = data.get("data", {}).get("object", {}).get("lines", {}).get("data", [])
+        line_items = event.get("data", {}).get("object", {}).get("lines", {}).get("data", [])
         interval = line_items[0].get("plan", {}).get("interval") if line_items else None
-       
+        
+    
 
-        if event_id not in list_events:
-            list_events.append(event_id)
-            if license_key != None:
-                license_key = data["data"]["object"]["metadata"]["license_key"]
-                interval = data["data"]["object"]["lines"]["data"][0]["plan"]["interval"]
+        if license_key != None:
+            license_key = event["data"]["object"]["metadata"]["license_key"]
+            interval = event["data"]["object"]["lines"]["data"][0]["plan"]["interval"]
 
-                license_id = find_license_id(license_key)
-                validity = retrieve_license_validity(license_id=license_id)
-                update_license_subscription(
-                    license_id=license_id, interval=interval, validity=validity
-                )
+            license_id = find_license_id(license_key)
+            validity = retrieve_license_validity(license_id=license_id)
+            update_license_subscription(license_id=license_id, interval=interval, validity=validity)
 
     elif event["type"] == "customer.subscription.deleted":
-        event_id = data.get("id", None)
 
         license_key = (
-            data.get("data", {}).get("object", {}).get("metadata", {}).get("license_key", None)
+            event.get("data", {}).get("object", {}).get("metadata", {}).get("license_key", None)
         )
 
-        interval = data.get("data", {}).get("object", {}).get("plan", {}).get("interval", None)
+        interval = event.get("data", {}).get("object", {}).get("plan", {}).get("interval", None)
         
 
-        if event_id not in list_events and license_key != None:
-            list_events.append(event_id)
-
+        if  license_key != None:
+    
             license_id = find_license_id(license_key)
             cancel_sub(license_id=license_id, interval=interval)
             disable_license(license_id=license_id)
-            list_events.append(event_id)
-            write("cache.json", list_events)
+            
 
     else:
         # Unexpected event type
         print("Unhandled event type {}".format(event["type"]))
+    
+    list_events.append(event_id)
+    write("cache.json", list_events)
 
     return jsonify(success=True)
 
