@@ -21,6 +21,7 @@ def home():
 
 @app.route("/webhooks", methods=["POST"])
 def webhook():
+    global list_events
     payload = request.data
     sig_header = request.headers.get("Stripe-Signature")
     event = None
@@ -67,11 +68,10 @@ def webhook():
         line_items = event.get("data", {}).get("object", {}).get("lines", {}).get("data", [])
         interval = line_items[0].get("plan", {}).get("interval") if line_items else None
         
-    
+     
 
         if license_key != None:
-            license_key = event["data"]["object"]["metadata"]["license_key"]
-            interval = event["data"]["object"]["lines"]["data"][0]["plan"]["interval"]
+            
 
             license_id = find_license_id(license_key)
             validity = retrieve_license_validity(license_id=license_id)

@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 import uuid
 
 def date_return(interval,validity):
-    print(interval)
+    
     if interval == "day":
         # Add one day to the current UTC time
         time_later = validity + timedelta(days=1)
@@ -28,7 +28,7 @@ def date_return(interval,validity):
 def find_license_id(license_key):
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], "/api/v1/licenses/"),
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
         params={"license_key":license_key}
     )
     try:
@@ -40,14 +40,14 @@ def find_license_id(license_key):
 def disable_license(license_id):
     requests.post(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/disable/"),
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
 
 
 def retrieve_license_validity(license_id):
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/"),
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
     return response.json()["validity_period"]
 
@@ -70,7 +70,7 @@ def cancel_sub(license_id, interval):
     requests.patch(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/"),
         json=body,
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
 
 
@@ -83,7 +83,7 @@ def update_license_subscription(license_id, interval, validity):
     response = requests.patch(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/"),
         json=body,
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
 
     return response
@@ -113,7 +113,7 @@ def create_order(license_key, interval):
     response = requests.post(
         url="{}{}".format(os.environ["BASE_URL"], "/api/v1/orders/create_order/"),
         json=body,
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
     return response
 
@@ -122,6 +122,6 @@ def generate_license():
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], "/api/v1/orders/generate_license/"),
         params={"product": os.environ["PRODUCT_SHORT_CODE"], "quantity": 1},
-        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGAMENT_KEY"])},
+        headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
     )
     return response.json()[0]
