@@ -40,16 +40,16 @@ Detail explanation of event handling will be explained in future section's.
      * `pip install -r requirements.txt`
 3. Create .env file
 ```.env
-API_MANAGEMENT_KEY="api_management_key_from_LS" 
+API_MANAGEMENT_KEY= "api_management_key_from_LS" 
 UUID = "your_uuid_from_LS"
-SHARED_KEY ="shared_key_from_LS"
+SHARED_KEY = "shared_key_from_LS"
 PRODUCT_SHORT_CODE = "LS_product"
-BASE_URL="https://saas.licensespring.com"
-API_URL ='https://api.licensespring.com'
-STRIPE_PRIVATE_KEY="your_stripe_key"
-STRIPE_PRODUCT="your_stripe_product" 
-STRIPE_SECRET="your_stripe_secret"  
-PAYMENT_LINK="payment_link"
+BASE_URL = "https://saas.licensespring.com"
+API_URL = "https://api.licensespring.com"
+STRIPE_PRIVATE_KEY = "your_stripe_key"
+STRIPE_PRODUCT = "your_stripe_product" 
+STRIPE_SECRET = "your_stripe_secret"  
+PAYMENT_LINK = "payment_link"
 ```
 License Spring Keys can be found inside [portal](https://saas.licensespring.com) under *Settings --> Keys*. 
 STRIPE_PRIVATE_KEY can be found in _Developers --> API keys --> Secret key_  
