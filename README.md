@@ -59,8 +59,8 @@ Add your webhook signing secret to STRIPE_SECRET; this information is available 
 #### Payment link  
 Go to _Stripe --> Payments --> Payment link_. First define your subscription product then copy paste payment link inside **.env file**
 <p align="center">
-  <img src="readme/link1.png" style="width: 1250px; height: 200px;"/>
-  <img src="readme/link2.png" style="width: 1250px; height: 200px;" /> 
+  <img src="readme/link1.png" style="width: 1250px; height: 100px;"/>
+  <img src="readme/link2.png" style="width: 1250px; height: 100px;" /> 
 </p>
 
 
