@@ -1,19 +1,19 @@
-from flask import Flask, jsonify, request, render_template
-import os
-import json
-import stripe
-from flask import Response
+from flask import Flask, jsonify, request, render_template,Response
+import os,json,stripe
 from licensespring import *
-from simple_functions import *
+from helpers import read,write,check_and_trim
 
 stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
-list_events = read("cache.json")
+
 
 app = Flask(__name__)
+
+list_events = read("cache.json")
 
 
 @app.route("/")
 def home():
+    """Defines the home page route. When visited, it renders payment link"""
     
     return render_template("home.html", link = os.environ["PAYMENT_LINK"]
 )
@@ -21,7 +21,8 @@ def home():
 
 @app.route("/webhooks", methods=["POST"])
 def webhook():
-    global list_events
+    """Handles incoming webhooks from Stripe."""
+
     payload = request.data
     sig_header = request.headers.get("Stripe-Signature")
     event = None
@@ -31,7 +32,7 @@ def webhook():
         event = stripe.Webhook.construct_event(payload, sig_header, os.environ["STRIPE_SECRET"])
         
         
-        list_events = check_and_trim(list_events)
+        check_and_trim(list_events)
 
         event_id = event.get("id", None)
 

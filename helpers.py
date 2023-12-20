@@ -2,9 +2,9 @@ import json
 
 
 def check_and_trim(list_):
-    if len(list_) > 20:
+    if len(list_) > 5:
         list_.pop(0)
-    return list_
+
 
 def read(file_dir):
     try:

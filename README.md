@@ -56,6 +56,13 @@ STRIPE_PRIVATE_KEY can be found in _Developers --> API keys --> Secret key_
 STRIPE_PRODUCT can be found in _Products --> Pricing --> API ID_  
 Add your Stripe payment link to PAYMENT_LINK     
 Add your webhook signing secret to STRIPE_SECRET; this information is available after starting your webhook `"whsec_*******"`
+#### Payment link  
+Go to _Stripe --> Payments --> Payment link_. First define your subscription product then copy paste payment link inside **.env file**
+<p align="center">
+  <img src="readme/link1.png" style="width: 200px; height: 50px;"/>
+  <img src="readme/link2.png" style="width: 200px; height: 50px;" /> 
+</p>
+
 
 ## Application 
 
@@ -72,29 +79,12 @@ Add your webhook signing secret to STRIPE_SECRET; this information is available 
  3. Click on stripe payment link and proceed payment
 
 If payment was successful **LicenseSpring** will create **Subscription** type license. You can check your [portal](https://saas.licensespring.com).   
-This application handles when **subscription** is cancelled inside **stripe**. License will become **disabled** and **valid duration** will be set depending on **stripe billing cycle** (day,week,month and year). Application handles incoming invoices of subscription which were made from application. For a detailed explanation of the code, check the  **Detail Explanation section**  
+This application handles when **subscription** is cancelled inside **stripe**. License will become **disabled** and **valid duration** will be set depending on **stripe billing cycle** (day,week,month and year). Application handles incoming invoices of subscription which were made from application.  
 **WARNING: Demo application accepts only products which are subscription type with stripe billing cycle day,week,month and year**    
+**INFO: cache.json handles if 2 same stripe events occur** 
 
-### Detail Explanation
-**Project tree**
-```
-├── app.py
-├── simple_functions.py
-├── cache.json
-├── licensespring.py
-├── READ.md
-├── requirements.txt
-├── templates
-    └── home.html
-```
-#### app.py
-This Python script uses **Flask**, a web framework, to create a web application. It interacts with the **Stripe API** for payment processing and manages subscriptions and licenses.  
-**Routes**  
-* **app.route("/")**: Defines the home page route. When visited, it renders payment link 
- 
-* **@app.route("/webhooks", methods=["POST"])**: Handles incoming webhooks from Stripe.
 
-#### **Webhooks**
+### **Webhooks**
 **customer.subscription.created** 
 
 1. The **billing interval** (like monthly, yearly) and **subscription_id** are extracted  from the event data.  
@@ -107,38 +97,13 @@ This Python script uses **Flask**, a web framework, to create a web application.
 
 **customer.subscription.deleted**  
 
-When subscription is cancelled. License will become **disabled** with **valid duration**. 
+1. When subscription is cancelled. License will become **disabled** with **valid duration**. 
 
 
 
-#### licensespring.py
 
-**disable_license(license_id)**  
- Disable a specific license identified by license_id
 
-**find_license_id(license_key)**  
-Outputs license_id of given license key
 
-**retrieve_license_validity(license_id)**  
-Get the validity period of a given license
-
-**cancel_sub(license_id, interval)**  
-Update a license's status when its associated subscription is canceled, marking it for a specific remaining valid duration
-
-**update_license_subscription(license_id, interval, validity)**  
-To extend the validity of a license based on its subscription renewal.
-
-**create_order(license_key, order_number, interval)**  
-This function is used to create a new order. It calculates a validity date for the license based on the given interval, constructs a body for the POST request with order details
-
-**generate_license()**  
-The function generate_license() generates a unique LicenseSpring key.
-
-#### simple_functions.py
-Functions that handle the cache
-
-#### cache.json
-handles if stripe sends two same events
    
     
 

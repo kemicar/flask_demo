@@ -5,6 +5,8 @@ from dateutil.relativedelta import relativedelta
 import uuid
 
 def date_return(interval,validity):
+    """Takes in interval(stripe subscription cycle) and current validity of license,
+    return date"""
     
     if interval == "day":
         # Add one day to the current UTC time
@@ -26,6 +28,7 @@ def date_return(interval,validity):
 
 
 def find_license_id(license_key):
+    """Takes in license key, returns license_id"""
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], "/api/v1/licenses/"),
         headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
@@ -38,6 +41,8 @@ def find_license_id(license_key):
         
 
 def disable_license(license_id):
+    """Disable a specific license identified by license_id"""
+
     requests.post(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/disable/"),
         headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
@@ -45,6 +50,7 @@ def disable_license(license_id):
 
 
 def retrieve_license_validity(license_id):
+    """Takes license_id, returns validity_period of license"""
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], f"/api/v1/licenses/{license_id}/"),
         headers={"Authorization": "Api-Key {}".format(os.environ["API_MANAGEMENT_KEY"])},
@@ -53,6 +59,8 @@ def retrieve_license_validity(license_id):
 
 
 def cancel_sub(license_id, interval):
+    """Update a license's status when its associated subscription is canceled,
+      marking it for a specific remaining valid duration"""
     if interval == "day":
         valid_duration = "1d"
 
@@ -75,7 +83,7 @@ def cancel_sub(license_id, interval):
 
 
 def update_license_subscription(license_id, interval, validity):
-    
+    """extends the validity of a license based on its subscription renewal"""
     date = date_return(interval,validity)
 
     body = {"is_trial": False, "validity_period": date}
@@ -90,6 +98,7 @@ def update_license_subscription(license_id, interval, validity):
 
 
 def create_order(license_key, interval):
+    """creates order with valid license_key and subscription model"""
     now_utc = datetime.utcnow()
 
     date = date_return(interval,now_utc)
@@ -119,6 +128,7 @@ def create_order(license_key, interval):
 
 
 def generate_license():
+    """generates a unique LicenseSpring key"""
     response = requests.get(
         url="{}{}".format(os.environ["BASE_URL"], "/api/v1/orders/generate_license/"),
         params={"product": os.environ["PRODUCT_SHORT_CODE"], "quantity": 1},
